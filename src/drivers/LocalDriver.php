@@ -24,7 +24,7 @@
          */
 		function  expand (string $url) :string
 		{
-			return Link::where("long_url", $url)->select("short_url")->pluck("short_url")->first() ?: "";
+			return Link::where("short_url", $url)->select("long_url")->pluck("long_url")->first() ?: "";
 		}
 		
 		/**
