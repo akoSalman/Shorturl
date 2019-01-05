@@ -7,7 +7,7 @@
 	class LocalDriver implements BaseDriver
 	{
 		protected  $props = [];
-		protected $config, $main_str, $head, $tail;
+		protected $config, $main_str, $head, $tail, $base_url;
 		
 		public function __construct ()
 		{
@@ -15,6 +15,7 @@
 			$this->main_str = $this->config['drivers']['local']['str_shuffled'];
 			$this->head = $this->main_str[0];
 			$this->tail = $this->main_str[strlen($this->main_str) - 1];
+			$this->base_url = $this->config['drivers']['local']['base_url'];
 		}
 
         /**
@@ -27,7 +28,7 @@
 		    $link = Link::where("short_url", $url)->select("long_url")->first();
 		    if ($link) {
 		        $link->increment("clicks");
-		        return $link->long_url;
+		        return $this->base_url . "/" . $link->long_url;
             }
 			return "";
 		}
@@ -39,6 +40,7 @@
 		 */
 		function shorten (string $url) :string
 		{
+		    $url = $this->removeBaseUrl ($url);
 		    $duplicate = Link::where('long_url', $url)->first();
 		    if ($duplicate)
 		        return $duplicate->short_url;
@@ -96,4 +98,9 @@
 			$this->props = array_merge($this->props, $props);
 			return $this;
 		}
+
+		private function removeBaseUrl (string $url) :string
+        {
+            return str_replace($this->base_url, "", $url);
+        }
 	}
