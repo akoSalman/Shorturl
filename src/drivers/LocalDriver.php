@@ -39,6 +39,10 @@
 		 */
 		function shorten (string $url) :string
 		{
+		    $duplicate = Link::where('long_url', $url)->first();
+		    if ($duplicate)
+		        return $duplicate->short_url;
+
 			$latest = Link::latest()->select("short_url")->first();
 			$short_url = $latest ? $this->findNexPerm($latest->short_url) : $this->getFirstUrl();
 			Link::create(["long_url" => $url, "short_url" => $short_url, 'props' => $this->props]);
