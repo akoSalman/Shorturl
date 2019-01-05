@@ -7,8 +7,9 @@
 	class Link extends Model
 	{
 		protected  $fillable = [
-			'short_url',
-			'long_url',
+			'short_path',
+			'long_path',
+			'base_url',
 			'clicks',
 			'properties'
 		];

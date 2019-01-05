@@ -7,7 +7,7 @@
 	class LocalDriver implements BaseDriver
 	{
 		protected  $props = [];
-		protected $config, $main_str, $head, $tail, $base_url, $to_be_shortened;
+		protected $config, $main_str, $head, $tail, $base_url, $path;
 		
 		public function __construct ()
 		{
@@ -25,10 +25,10 @@
 		function  expand (string $url) :string
 		{
 		    $this->parseUrl($url);
-		    $link = Link::where("short_url", $this->to_be_shortened)->first();
+		    $link = Link::where("short_path", $this->path)->first();
 		    if ($link) {
 		        $link->increment("clicks");
-		        return $link->properties['base_url'] . "/" . $link->long_url;
+		        return $link->base_url . "/" . $link->long_path;
             }
 			return "";
 		}
@@ -42,16 +42,19 @@
 		{
             $this->parseUrl ($url);
 
-            $this->withProperties(["base_url" => $this->base_url]);
-
-		    $duplicate = Link::where('long_url', $this->to_be_shortened)->first();
+		    $duplicate = Link::where('long_path', $this->path)->first();
 		    if ($duplicate)
-		        return $duplicate->properties['base_url'] . "/" . $duplicate->short_url;
+		        return $duplicate->base_url . "/" . $duplicate->short_path;
 
-			$latest = Link::latest()->select("short_url")->first();
-			$short_url = $latest ? $this->findNexPerm($latest->short_url) : $this->getFirstUrl();
-			Link::create(["long_url" => $this->to_be_shortened, "short_url" => $short_url, 'properties' => $this->props]);
-			return $this->base_url . "/" . $short_url;
+			$latest = Link::latest()->select("short_path")->first();
+			$short_path = $latest ? $this->findNexPerm($latest->short_path) : $this->getFirstUrl();
+			Link::create([
+			    "long_path" => $this->path,
+                "short_path" => $short_path,
+                'base_url' => $this->base_url,
+                'properties' => $this->props]
+            );
+			return $this->base_url . "/" . $short_path;
 		}
 
         /**
@@ -62,10 +65,10 @@
         private function getFirstUrl () : string
         {
             $min_length = $this->config['drivers']['local']['min_length'];
-            $short_url = "";
+            $short_path = "";
             for ($i = 0; $i < $min_length; $i++)
-                $short_url .= $this->head;
-            return $short_url;
+                $short_path .= $this->head;
+            return $short_path;
         }
 
         /**
@@ -105,15 +108,15 @@
         private function parseUrl (string $url)
         {
             $parse = parse_url($url);
-            $to_be_shortened = "";
+            $path = "";
             if ($parse['path'] ?? null)
-                $to_be_shortened .= $parse['path'];
+                $path .= str::replaceFirst("/", "", $parse['path']);
             if ($parse['query'] ?? null)
-                $to_be_shortened .= $parse['query'];
+                $path .= "?" . $parse['query'];
             if ($parse['fragment'] ?? null)
-                $to_be_shortened .= $parse['fragment'];
+                $path .= "#" . $parse['fragment'];
 
-            $this->base_url = str_replace($to_be_shortened, "", $url);
-            $this->to_be_shortened = $to_be_shortened;
+            $this->base_url = str_replace("/" . $path, "", $url);
+            $this->path = $path;
         }
 	}

@@ -10,7 +10,7 @@ class TestLocalDriver extends TestCase
 
 	public function test_shorten ()
 	{
-	    $long = "127.0.0.1:8000/here/is/a/long/url";
+	    $long = "127.0.0.1:8000/here/is/a/long/url?x=12#asdlf";
         $shortened = \Shorturl::shorten($long);
         $this->assertNotEmpty($shortened);
         $this->assertNotNull($shortened);
@@ -19,7 +19,8 @@ class TestLocalDriver extends TestCase
 	public function test_expand ()
     {
         $long1 = \Shorturl::expand("127.0.0.1:8000/7777");
-        $this->assertEquals("", $long1);
+
+        $this->assertEquals("127.0.0.1:8000/here/is/a/long/url?x=12#asdlf", $long1);
     }
 
     public function test_get_driver ()
