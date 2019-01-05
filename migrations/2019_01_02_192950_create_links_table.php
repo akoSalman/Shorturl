@@ -13,8 +13,8 @@ class CreateLinksTable extends Migration
     {
         Schema::create(config('shorturl.drivers.local.table_name'), function (Blueprint $table) {
             $table->increments('id');
-            $table->string('long_url', 3072)->unique();
-            $table->string('short_url')->unique();
+            $table->string('long_url', config('shorturl.drivers.local.index_key_prefix_size'))->unique();
+            $table->string('short_url', 10)->unique();
             $table->bigInteger('clicks')->nullable();
             $table->text('properties')->nullable();
             $table->timestamps();

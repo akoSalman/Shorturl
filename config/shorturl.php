@@ -5,9 +5,22 @@
 			"default" => "local",
 			
 			"local" => [
-//			    'base_url'      => env('APP_URL', '127.0.0.1'),
+			    'base_url'      => env('APP_URL', '127.0.0.1'),
 				'table_name'    => 'links',
-				
+
+                /**
+                 * For making the urls unique in the DB, we must create an index or unique_key
+                 * for the column url
+                 * But based on different versions of mysql the size of the index key
+                 * is different as you can see here
+                 * https://dev.mysql.com/doc/refman/5.7/en/innodb-restrictions.html#innodb-maximums-minimums
+                 *
+                 * Possible values in byte could be (767, 3072) and based on the
+                 * charset and collation used for the database or the table, given values may differ
+                 * for example for a ** utf8mb4 ** charset the given values could be (767/4, 3072/4);
+                 *
+                 */
+				'index_key_prefix_size'     => '767',
 				/**
 				 * The shuffled string contains both [0-9] and [a-zA-Z]
 				 */
