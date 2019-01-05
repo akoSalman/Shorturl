@@ -7,7 +7,7 @@
 	class LocalDriver implements BaseDriver
 	{
 		protected  $props = [];
-		protected $config, $main_str, $head, $tail, $base_url;
+		protected $config, $main_str, $head, $tail, $base_url, $to_be_shortened;
 		
 		public function __construct ()
 		{
@@ -15,7 +15,6 @@
 			$this->main_str = $this->config['drivers']['local']['str_shuffled'];
 			$this->head = $this->main_str[0];
 			$this->tail = $this->main_str[strlen($this->main_str) - 1];
-			$this->base_url = $this->config['drivers']['local']['base_url'];
 		}
 
         /**
@@ -25,10 +24,11 @@
          */
 		function  expand (string $url) :string
 		{
-		    $link = Link::where("short_url", $url)->select("long_url")->first();
+		    $this->parseUrl($url);
+		    $link = Link::where("short_url", $this->to_be_shortened)->first();
 		    if ($link) {
 		        $link->increment("clicks");
-		        return $this->base_url . "/" . $link->long_url;
+		        return $link->properties['base_url'] . "/" . $link->long_url;
             }
 			return "";
 		}
@@ -40,15 +40,18 @@
 		 */
 		function shorten (string $url) :string
 		{
-		    $url = $this->removeBaseUrl ($url);
-		    $duplicate = Link::where('long_url', $url)->first();
+            $this->parseUrl ($url);
+
+            $this->withProperties(["base_url" => $this->base_url]);
+
+		    $duplicate = Link::where('long_url', $this->to_be_shortened)->first();
 		    if ($duplicate)
-		        return $duplicate->short_url;
+		        return $duplicate->properties['base_url'] . "/" . $duplicate->short_url;
 
 			$latest = Link::latest()->select("short_url")->first();
 			$short_url = $latest ? $this->findNexPerm($latest->short_url) : $this->getFirstUrl();
-			Link::create(["long_url" => $url, "short_url" => $short_url, 'props' => $this->props]);
-			return $short_url;
+			Link::create(["long_url" => $this->to_be_shortened, "short_url" => $short_url, 'properties' => $this->props]);
+			return $this->base_url . "/" . $short_url;
 		}
 
         /**
@@ -99,8 +102,18 @@
 			return $this;
 		}
 
-		private function removeBaseUrl (string $url) :string
+        private function parseUrl (string $url)
         {
-            return str_replace($this->base_url, "", $url);
+            $parse = parse_url($url);
+            $to_be_shortened = "";
+            if ($parse['path'] ?? null)
+                $to_be_shortened .= $parse['path'];
+            if ($parse['query'] ?? null)
+                $to_be_shortened .= $parse['query'];
+            if ($parse['fragment'] ?? null)
+                $to_be_shortened .= $parse['fragment'];
+
+            $this->base_url = str_replace($to_be_shortened, "", $url);
+            $this->to_be_shortened = $to_be_shortened;
         }
 	}
