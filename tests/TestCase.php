@@ -14,8 +14,8 @@ abstract class TestCase extends  \Orchestra\Testbench\TestCase
             'driver'   => 'mysql',
             'database' => 'shorturl',
             'host'   => '127.0.0.1',
-            'username'  => 'user',
-            'password' => 'pass'
+            'username'  => 'root',
+            'password' => 'mysql'
         ]);
         $app['config']->set('app.key', 'sF5r4kJy5HEcOEx3NWxUcYj1zLZLHxuu');
     }
@@ -38,6 +38,6 @@ abstract class TestCase extends  \Orchestra\Testbench\TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->loadMigrationsFrom(__DIR__ . '/../migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../migrations/');
     }
 }
