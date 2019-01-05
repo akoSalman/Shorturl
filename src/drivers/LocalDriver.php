@@ -24,7 +24,12 @@
          */
 		function  expand (string $url) :string
 		{
-			return Link::where("short_url", $url)->select("long_url")->pluck("long_url")->first() ?: "";
+		    $link = Link::where("short_url", $url)->select("long_url")->first();
+		    if ($link) {
+		        $link->increment("clicks");
+		        return $link->long_url;
+            }
+			return "";
 		}
 		
 		/**
