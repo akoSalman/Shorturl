@@ -1,6 +1,6 @@
 # shorturl
 Simply launch a url-shortener on your server.
-As the main purpose of this package is to launch a url-shortener on your server, so for now the `local` driver
+As the main purpose of this package is to shorten urls locally, so for now the `local` driver
 is available and `bitly and google` drivers will be added soon.
 
 **Requirements:**
@@ -33,7 +33,9 @@ You can get an instance of the `Shorturl` through Laravel `Facades`:
 // Default driver is local
 $url = 'http://www.domain.com/here/is/a/long/url';
 $short_url = \Shorturl::shorten($url); // http://www.domain.com/abde
-$expanded = \Shorturl::expand('http://www.domain.com/abde') // $url == $short_url
+
+// Expand shortened url
+$expanded = \Shorturl::expand('http://www.domain.com/abde') // http://www.domain.com/here/is/a/long/url
 
 
 // Or you can specify the driver
@@ -51,4 +53,4 @@ Every time a url is expanded the `clicks` counter for given url is incremented, 
 make some statistics of the links.
 
 You can use `\Ako\Shorturl\Models\Link` model as an `Eloquent` model to get number of `clicks` of each url, stored
-`properties` or every other staff on the links. 
+`properties` or any other staff on the links. 
