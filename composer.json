@@ -1,7 +1,19 @@
 {
     "name": "ako/shorturl",
     "description": "Url shortener",
+    "version": "0.0.2-beta",
     "type": "library",
+    "keywords": [
+        "shorturl",
+        "php-shorturl",
+        "laravel-shorturl",
+        "laravel-urlshortener",
+        "urlshortener",
+        "url-shortener",
+        "php",
+        "laravel"
+    ],
+    "homepage": "https://github.com/akoSalman/shorturl",
     "require": {
     	"php" : "^7.1",
         "illuminate/config": "~5.5.0|~5.6.0|~5.7.0",

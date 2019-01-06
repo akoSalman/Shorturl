@@ -7,6 +7,10 @@
 			"local" => [
 			    'base_url'      => env('APP_URL', '127.0.0.1'),
 				'table_name'    => 'links',
+                'charset'       => 'utf8',
+
+                // utf8_bin gives us case sensitive search to the DB
+                'collation'     => 'utf8_bin',
 
                 /**
                  * For making the urls unique in the DB, we must create an index or unique_key
@@ -21,6 +25,7 @@
                  *
                  */
 				'index_key_prefix_size'     => '767',
+
 				/**
 				 * The shuffled string contains both [0-9] and [a-zA-Z]
 				 */

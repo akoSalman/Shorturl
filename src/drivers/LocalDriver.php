@@ -11,10 +11,11 @@
 		
 		public function __construct ()
 		{
-			$this->config = config('shorturl');
-			$this->main_str = $this->config['drivers']['local']['str_shuffled'];
+			$this->config = config('shorturl.drivers.local');
+			$this->main_str = $this->config['str_shuffled'];
 			$this->head = $this->main_str[0];
 			$this->tail = $this->main_str[strlen($this->main_str) - 1];
+            $this->checkCaseSensitive ();
 		}
 
         /**
@@ -64,7 +65,7 @@
          */
         private function getFirstUrl () : string
         {
-            $min_length = $this->config['drivers']['local']['min_length'];
+            $min_length = $this->config['min_length'];
             $short_path = "";
             for ($i = 0; $i < $min_length; $i++)
                 $short_path .= $this->head;
@@ -119,4 +120,13 @@
             $this->base_url = str_replace("/" . $path, "", $url);
             $this->path = $path;
         }
+
+        private function checkCaseSensitive ()
+        {
+            if ((!$this->config['case_sensitive'] ?? null)) {
+                // Remove upper cases from main string
+                $this->main_str = preg_replace("/(.)\\1+/", "$1", strtolower($this->main_str));
+            }
+        }
+
 	}
