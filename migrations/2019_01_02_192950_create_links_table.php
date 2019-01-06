@@ -19,7 +19,7 @@ class CreateLinksTable extends Migration
             $table->string('long_path', $local_conf['index_key_prefix_size'])->unique();
             $table->string('short_path', 10)->unique();
             $table->string('base_url')->nullable();
-            $table->bigInteger('clicks')->nullable();
+            $table->bigInteger('clicks')->nullable()->default(0);
             $table->text('properties')->nullable();
             $table->timestamps();
         });
