@@ -1,7 +1,7 @@
 {
     "name": "ako/shorturl",
     "description": "Url shortener",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "type": "library",
     "keywords": [
         "shorturl",

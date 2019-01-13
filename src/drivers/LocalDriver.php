@@ -33,34 +33,39 @@
             }
 			return "";
 		}
-		
-		/**
-		 * @param string $url
-		 *
-		 * @return string
-		 */
+
+        /**
+         * @param string $url
+         *
+         * @return string
+         * @throws \Exception
+         */
 		function shorten (string $url) :string
 		{
             $this->parseUrl ($url);
 
             $tbl = (new Link)->getTable();
 
-            // Lock table
-            \DB::connection()->getPdo()->exec("LOCK TABLES $tbl WRITE, $tbl AS aliased WRITE");
-
-            // Check if given url has been shorten previously
-            $duplicate = Link::where(['long_path' => $this->path])->first();
-            if ($duplicate)
+            try {
+                // Lock table
+                \DB::connection()->getPdo()->exec("LOCK TABLES $tbl WRITE, $tbl AS aliased WRITE");
+                // Check if given url has been shorten previously
+                $duplicate = Link::where(['long_path' => $this->path])->first();
+                if ($duplicate)
                 return $duplicate->base_url . "/" . $duplicate->short_path;
 
-            $short_path = $this->getNextShortpath();
+                $short_path = $this->getNextShortpath();
 
-            Link::create([
-                "long_path" => $this->path,
-                "short_path" => $short_path,
-                'base_url' => $this->base_url,
-                'properties' => $this->props]
-            );
+                Link::create([
+                    "long_path" => $this->path,
+                    "short_path" => $short_path,
+                    'base_url' => $this->base_url,
+                    'properties' => $this->props]
+                );
+            } catch (\Exception $e) {
+                \DB::connection()->getPdo()->exec("UNLOCK TABLES");
+                throw $e;
+            }
             \DB::connection()->getPdo()->exec("UNLOCK TABLES");
             return $this->base_url . "/" . $short_path;
         }
@@ -151,7 +156,7 @@
             if (!$latest->count()) return $this->getFirstUrl();
 
             if ($latest->count() == 1)
-                return $latest->first()->short_path;
+                return $this->findNextPerm($latest->first()->short_path);
 
             foreach ($latest->reverse() as $key => $item) {
                 $next = $this->findNextPerm($item->short_path);
