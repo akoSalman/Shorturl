@@ -49,7 +49,7 @@
             \DB::connection()->getPdo()->exec("LOCK TABLES $tbl WRITE, $tbl AS aliased WRITE");
 
             // Check if given url has been shorten previously
-            $duplicate = Link::where(['long_path' => $url])->first();
+            $duplicate = Link::where(['long_path' => $this->path])->first();
             if ($duplicate)
                 return $duplicate->base_url . "/" . $duplicate->short_path;
 
