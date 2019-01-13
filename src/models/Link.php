@@ -17,4 +17,10 @@
 		protected  $casts = [
 			'properties' => 'collection'
 		];
-	}
+
+		public function __construct(array $attributes = [])
+        {
+            $this->table = config('shorturl.drivers.local.table_name');
+            parent::__construct($attributes);
+        }
+    }

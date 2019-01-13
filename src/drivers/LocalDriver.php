@@ -43,20 +43,27 @@
 		{
             $this->parseUrl ($url);
 
-		    $duplicate = Link::where('long_path', $this->path)->first();
-		    if ($duplicate)
-		        return $duplicate->base_url . "/" . $duplicate->short_path;
+            $tbl = (new Link)->getTable();
 
-			$latest = Link::latest()->select("short_path")->first();
-			$short_path = $latest ? $this->findNexPerm($latest->short_path) : $this->getFirstUrl();
-			Link::create([
-			    "long_path" => $this->path,
+            // Lock table
+            \DB::connection()->getPdo()->exec("LOCK TABLES $tbl WRITE, $tbl AS aliased WRITE");
+
+            // Check if given url has been shorten previously
+            $duplicate = Link::where(['long_path' => $url])->first();
+            if ($duplicate)
+                return $duplicate->base_url . "/" . $duplicate->short_path;
+
+            $short_path = $this->getNextShortpath();
+
+            Link::create([
+                "long_path" => $this->path,
                 "short_path" => $short_path,
                 'base_url' => $this->base_url,
                 'properties' => $this->props]
             );
-			return $this->base_url . "/" . $short_path;
-		}
+            \DB::connection()->getPdo()->exec("UNLOCK TABLES");
+            return $this->base_url . "/" . $short_path;
+        }
 
         /**
          * Git the first short url
@@ -79,7 +86,7 @@
          * @param string $current_perm
          * @return string
          */
-        private function findNexPerm (string $current_perm) :string
+        private function findNextPerm (string $current_perm) :string
 		{
 			if (!strlen($current_perm))
 			    return $this->head;
@@ -88,7 +95,7 @@
 			foreach($arr as $key => $current_char) {
 				if ($current_char == $this->tail) {
 					$current_perm = Str::replaceLast($current_char, "", $current_perm);
-					return $this->findNexPerm($current_perm) . $this->head;
+					return $this->findNextPerm($current_perm) . $this->head;
 				}
                 $next_char = str_split(Str::after($this->main_str, $current_char));
 				return Str::replaceLast($current_char, $next_char, $current_perm);
@@ -126,6 +133,33 @@
             if ((!$this->config['case_sensitive'] ?? null)) {
                 // Remove upper cases from main string
                 $this->main_str = preg_replace("/(.)\\1+/", "$1", strtolower($this->main_str));
+            }
+        }
+
+        /**
+         * @return string
+         */
+        private function getNextShortpath () : string
+        {
+            $tbl = (new Link)->getTable();
+            // Get latest short_path(s)
+            // As multiple instances could be created at the same timestamp which we get
+            // the latest one based on that
+            // so we must find the latest one(short_path) in the permutation of the main_str
+            $latest = collect(\DB::select("SELECT short_path FROM $tbl WHERE created_at = (SELECT MAX(created_at) FROM $tbl AS aliased)"));
+
+            if (!$latest->count()) return $this->getFirstUrl();
+
+            if ($latest->count() == 1)
+                return $latest->first()->short_path;
+
+            foreach ($latest->reverse() as $key => $item) {
+                $next = $this->findNextPerm($item->short_path);
+
+                // If next permutation of current item is in fetched items
+                // find next permutation of the next fetched one
+                if (!$latest->contains("short_path", $next))
+                    return $next;
             }
         }
 
