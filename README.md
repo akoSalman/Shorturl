@@ -18,7 +18,7 @@ Install via composer:
 composer require ako/shorturl
 `
 
-Or add ` "ako/shorturl":"^0.0.3"` to the `composer.json` file of your project.
+Or add ` "ako/shorturl":"^0.0.4"` to the `composer.json` file of your project.
 
 Run `php artisan vendor:publish` to add the `shorturl.php` config file to the `config` folder.
 
