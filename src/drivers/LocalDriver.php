@@ -44,18 +44,14 @@
 		{
             $this->parseUrl ($url);
 
-            $tbl = (new Link)->getTable();
-
-            try {
-                // Lock table
-                \DB::connection()->getPdo()->exec("LOCK TABLES $tbl WRITE, $tbl AS aliased WRITE");
-                // Check if given url has been shorten previously
-                $duplicate = Link::where(['long_path' => $this->path])->first();
-                if ($duplicate)
+            // Check if given url has been shorten previously
+            $duplicate = Link::where(['long_path' => $this->path])->first();
+            if ($duplicate)
                 return $duplicate->base_url . "/" . $duplicate->short_path;
 
-                $short_path = $this->getNextShortpath();
+            $short_path = $this->getNextShortpath();
 
+            try {
                 Link::create([
                     "long_path" => $this->path,
                     "short_path" => $short_path,
@@ -63,10 +59,12 @@
                     'properties' => $this->props]
                 );
             } catch (\Exception $e) {
-                \DB::connection()->getPdo()->exec("UNLOCK TABLES");
-                throw $e;
+                // If it is duplicate entry exception
+                // try to insert a new entry
+                if ($e instanceof \Illuminate\Database\QueryException && $e->getCode() == "23000") {
+                    return $this->shorten($url);
+                }
             }
-            \DB::connection()->getPdo()->exec("UNLOCK TABLES");
             return $this->base_url . "/" . $short_path;
         }
 
@@ -151,7 +149,7 @@
             // As multiple instances could be created at the same timestamp which we get
             // the latest one based on that
             // so we must find the latest one(short_path) in the permutation of the main_str
-            $latest = collect(\DB::select("SELECT short_path FROM $tbl WHERE created_at = (SELECT MAX(created_at) FROM $tbl AS aliased)"));
+            $latest = collect(\DB::select("SELECT short_path FROM $tbl WHERE created_at = (SELECT MAX(created_at) FROM $tbl)"));
 
             if (!$latest->count()) return $this->getFirstUrl();
 
@@ -167,5 +165,4 @@
                     return $next;
             }
         }
-
 	}
