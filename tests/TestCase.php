@@ -9,16 +9,13 @@ abstract class TestCase extends  \Orchestra\Testbench\TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
+        // Setup default database to use sqlite :memory:
         $app['config']->set('database.default', 'shorturl');
         $app['config']->set('database.connections.shorturl', [
-            'driver'   => 'mysql',
-            'database' => 'shorturl',
-            'host'   => '127.0.0.1',
-            'port'  => '3306',
-            'username'  => 'root',
-            'password' => 'mysql'
-        ]);
-        $app['config']->set('app.key', 'sF5r4kJy5HEcOEx3NWxUcYj1zLZLHxuu');
+            'driver'   => 'sqlite',
+            'database' => ':memory:',
+            'prefix'   => '',
+        ]);'config']->set('app.key', 'sF5r4kJy5HEcOEx3NWxUcYj1zLZLHxuu');
     }
 
     protected function getPackageProviders($app)
