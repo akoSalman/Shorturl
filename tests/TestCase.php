@@ -15,7 +15,7 @@ abstract class TestCase extends  \Orchestra\Testbench\TestCase
             'driver'   => 'sqlite',
             'database' => ':memory:',
             'prefix'   => '',
-        ]);'config']->set('app.key', 'sF5r4kJy5HEcOEx3NWxUcYj1zLZLHxuu');
+        ]);
     }
 
     protected function getPackageProviders($app)
