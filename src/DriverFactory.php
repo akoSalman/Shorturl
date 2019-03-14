@@ -10,7 +10,7 @@
 		 *
 		 * @return LocalDriver
 		 */
-		function make (string $driver)
+		public function make (string $driver)
 		{
 			switch ($driver) {
 				case "local":

@@ -23,7 +23,7 @@
          *
          * @return string
          */
-		function  expand (string $url) :string
+		public function  expand (string $url) :string
 		{
 		    $this->parseUrl($url);
 		    $link = Link::where("short_path", $this->path)->first();
@@ -40,7 +40,7 @@
          * @return string
          * @throws \Exception
          */
-		function shorten (string $url) :string
+		public function shorten (string $url) :string
 		{
             $this->parseUrl ($url);
 
@@ -100,7 +100,7 @@
 					$current_perm = Str::replaceLast($current_char, "", $current_perm);
 					return $this->findNextPerm($current_perm) . $this->head;
 				}
-                $next_char = str_split(Str::after($this->main_str, $current_char));
+                $next_char = str_split(Str::after($this->main_str, $current_char))[0];
 				return Str::replaceLast($current_char, $next_char, $current_perm);
 			}
 		}
@@ -110,7 +110,7 @@
 		 *
 		 * @return LocalDriver
 		 */
-		function withProperties (array $props = []) :LocalDriver
+		public function withProperties (array $props = []) :LocalDriver
 		{
 			$this->props = array_merge($this->props, $props);
 			return $this;
@@ -151,18 +151,21 @@
             // so we must find the latest one(short_path) in the permutation of the main_str
             $latest = collect(\DB::select("SELECT short_path FROM $tbl WHERE created_at = (SELECT MAX(created_at) FROM $tbl)"));
 
-            if (!$latest->count()) return $this->getFirstUrl();
+            if (!$latest->count())
+                return $this->getFirstUrl();
 
-            if ($latest->count() == 1)
+            if ($latest->count() == 1) {
                 return $this->findNextPerm($latest->first()->short_path);
+            }
+            else {
+                foreach ($latest->reverse() as $key => $item) {
+                    $next = $this->findNextPerm($item->short_path);
 
-            foreach ($latest->reverse() as $key => $item) {
-                $next = $this->findNextPerm($item->short_path);
-
-                // If next permutation of current item is in fetched items
-                // find next permutation of the next fetched one
-                if (!$latest->contains("short_path", $next))
-                    return $next;
+                    // If next permutation of current item is in fetched items
+                    // find next permutation of the next fetched one
+                    if (!$latest->contains("short_path", $next))
+                        return $next;
+                }
             }
         }
 	}

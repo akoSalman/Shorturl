@@ -20,7 +20,7 @@
 		 *
 		 * @return Shorturl
 		 */
-		function onDriver (string $driver)
+		public function onDriver (string $driver)
 		{
 			$this->driver = $driver;
 			$this->setDriverInstance();
@@ -41,7 +41,7 @@
 		 *
 		 * @return string
 		 */
-		function getDriver (): string
+		public function getDriver (): string
 		{
 			return $this->driver ?: config("shorturl.drivers.default");
 		}
