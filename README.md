@@ -1,4 +1,8 @@
 # shorturl
+
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/akoSalman/Shorturl/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/akoSalman/Shorturl/?branch=master) [![Build Status](https://scrutinizer-ci.com/g/akoSalman/Shorturl/badges/build.png?b=master)](https://scrutinizer-ci.com/g/akoSalman/Shorturl/build-status/master) [![Code Intelligence Status](https://scrutinizer-ci.com/g/akoSalman/Shorturl/badges/code-intelligence.svg?b=master)](https://scrutinizer-ci.com/code-intelligence)
+
+
 Simply launch a url-shortener on your server.
 As the main purpose of this package is to shorten urls locally, so for now the `local` driver
 is available and `bitly and google` drivers will be added soon.
